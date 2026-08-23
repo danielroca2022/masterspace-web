@@ -1,16 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
-const portfolioItems = [
+interface PortfolioItem {
+  id: string | number;
+  title: string;
+  category: string;
+  location: string;
+  image_url: string;
+  details: string;
+}
+
+const defaultPortfolioItems: PortfolioItem[] = [
   {
     id: 1,
     title: "Manhattan Sky Penthouse",
     category: "Kitchens",
     location: "Upper East Side, NYC",
-    image: "/images/hero-bg.jpg",
+    image_url: "/images/hero-bg.jpg",
     details: "Obsidian oak cabinetry, waterfall marble island & integrated Miele appliances.",
   },
   {
@@ -18,7 +28,7 @@ const portfolioItems = [
     title: "Brooklyn Brownstone Millwork",
     category: "Wardrobes",
     location: "Brooklyn Heights",
-    image: "/images/service-cutting.jpg",
+    image_url: "/images/service-cutting.jpg",
     details: "Full architectural wardrobe system with soft leather lining and brushed brass accents.",
   },
   {
@@ -26,7 +36,7 @@ const portfolioItems = [
     title: "Tribeca Loft Entertainment Wall",
     category: "Living Spaces",
     location: "Tribeca, NYC",
-    image: "/images/service-3d.jpg",
+    image_url: "/images/service-3d.jpg",
     details: "Floating geometric wall paneling with acoustic dampening and hidden storage.",
   },
   {
@@ -34,7 +44,7 @@ const portfolioItems = [
     title: "Long Island City Master Suite",
     category: "Wardrobes",
     location: "Queens, NYC",
-    image: "/images/service-assembly.jpg",
+    image_url: "/images/service-assembly.jpg",
     details: "Seamless walk-in dressing space with automated indirect backlight illumination.",
   },
 ];
@@ -43,8 +53,27 @@ const categories = ["All", "Kitchens", "Wardrobes", "Living Spaces"];
 
 export default function ProjectGallery() {
   const [activeTab, setActiveTab] = useState("All");
+  const [items, setItems] = useState<PortfolioItem[]>(defaultPortfolioItems);
 
-  const filteredItems = portfolioItems.filter(
+  useEffect(() => {
+    async function loadSupabaseProjects() {
+      try {
+        const { data, error } = await supabase
+          .from("masterspace_projects")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          setItems(data);
+        }
+      } catch (err) {
+        console.error("Using default portfolio items", err);
+      }
+    }
+    loadSupabaseProjects();
+  }, []);
+
+  const filteredItems = items.filter(
     (item) => activeTab === "All" || item.category === activeTab
   );
 
@@ -95,7 +124,7 @@ export default function ProjectGallery() {
               >
                 {/* Background Image */}
                 <img
-                  src={item.image}
+                  src={item.image_url}
                   alt={item.title}
                   className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 filter brightness-85"
                 />

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, CheckCircle, Send, Sparkles } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 interface ConsultationModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface ConsultationModalProps {
 
 export default function ConsultationModal({ isOpen, onClose }: ConsultationModalProps) {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -20,13 +22,28 @@ export default function ConsultationModal({ isOpen, onClose }: ConsultationModal
     details: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      // Auto close after 3 seconds on success
-      // setSubmitted(false);
-    }, 4000);
+    setSubmitting(true);
+
+    try {
+      // Save lead submission to Supabase DB
+      await supabase.from("masterspace_leads").insert([
+        {
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          borough: formData.borough,
+          project_type: formData.projectType,
+          details: formData.details,
+        },
+      ]);
+    } catch (err) {
+      console.error("Error saving lead", err);
+    } finally {
+      setSubmitting(false);
+      setSubmitted(true);
+    }
   };
 
   const handleReset = () => {
@@ -191,9 +208,10 @@ export default function ConsultationModal({ isOpen, onClose }: ConsultationModal
 
                   <button
                     type="submit"
+                    disabled={submitting}
                     className="mt-2 w-full py-4 rounded-xl bg-[#d4af37] text-black font-semibold text-xs uppercase tracking-[0.2em] hover:bg-[#f3e5ab] transition-colors flex items-center justify-center gap-2 shadow-lg shadow-[#d4af37]/20"
                   >
-                    <span>Request Free 3D Design</span>
+                    <span>{submitting ? "Sending Request..." : "Request Free 3D Design"}</span>
                     <Send className="w-4 h-4" />
                   </button>
                 </form>
