@@ -1,71 +1,369 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* ============================================================
+   PALETA "CAFÉ" — escala completa de cafés
+   espresso = superficies · mocha = acento · latte = texto
+   ============================================================ */
+@theme {
+  /* Espresso — fondos y superficies (café tostado oscuro) */
+  --color-espresso-950: #0a0503;
+  --color-espresso-900: #120a06;
+  --color-espresso-850: #17100a;
+  --color-espresso-800: #1e150d;
+  --color-espresso-700: #2a1d12;
+  --color-espresso-600: #3a2818;
+  --color-espresso-500: #4d3520;
+
+  /* Mocha — acento cálido (sustituye al dorado) */
+  --color-mocha-50: #fbf6ef;
+  --color-mocha-100: #f4e8d8;
+  --color-mocha-200: #e9d2b3;
+  --color-mocha-300: #dbb68a;
+  --color-mocha-400: #cd9a5f;
+  --color-mocha-500: #bd8447;
+  --color-mocha-600: #9c6739;
+  --color-mocha-700: #7b4f2d;
+  --color-mocha-800: #5d3c24;
+  --color-mocha-900: #422b1b;
+
+  /* Latte — neutros cálidos para tipografía */
+  --color-latte-50: #faf5ef;
+  --color-latte-100: #f2e9de;
+  --color-latte-200: #e2d4c3;
+  --color-latte-300: #cbb8a2;
+  --color-latte-400: #ab9682;
+  --color-latte-500: #8b7663;
+  --color-latte-600: #6d5a4a;
+  --color-latte-700: #4f4134;
+  --color-latte-800: #362c24;
+  --color-latte-900: #241d17;
+
+  /* Terracota — estados destructivos dentro de la gama cálida */
+  --color-terracotta-300: #e8a189;
+  --color-terracotta-400: #d97757;
+  --color-terracotta-500: #c25a3a;
+  --color-terracotta-600: #a04628;
+
+  /* Las familias las carga y auto-hospeda next/font en layout.tsx; aquí solo se
+     referencian sus variables. Poiret One no tiene negrita ni cursiva: usarla
+     solo en peso 400 y sin italic, o el navegador las sintetiza (falso bold). */
+  --font-display: var(--font-poiret), var(--font-josefin), system-ui, sans-serif;
+  --font-sans: var(--font-josefin), system-ui, sans-serif;
+}
+
 :root {
-  --background: #090a0c;
-  --foreground: #f4f4f6;
-  --card: #12141a;
-  --card-border: rgba(255, 255, 255, 0.08);
-  --accent-gold: #d4af37;
-  --accent-gold-light: #f3e5ab;
-  --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --background: #120a06;
+  --foreground: #f5ede2;
+  --card: #1e150d;
+  --card-border: rgba(205, 154, 95, 0.16);
+  --accent: #cd9a5f;
+  --accent-strong: #bd8447;
+  --accent-light: #e9d2b3;
+
+  /* Gradientes reutilizables de la escala café */
+  --grad-page: linear-gradient(180deg, #1a1109 0%, #120a06 42%, #0d0704 100%);
+  --grad-accent: linear-gradient(135deg, #e9d2b3 0%, #cd9a5f 38%, #b8783f 72%, #8a5730 100%);
+  --grad-accent-hover: linear-gradient(135deg, #f4e8d8 0%, #dbb68a 40%, #cd9a5f 75%, #a06a38 100%);
+  --grad-surface: linear-gradient(155deg, rgba(48, 33, 20, 0.72) 0%, rgba(30, 21, 13, 0.82) 45%, rgba(18, 10, 6, 0.88) 100%);
+  --grad-surface-hover: linear-gradient(155deg, rgba(66, 45, 27, 0.85) 0%, rgba(42, 29, 18, 0.9) 45%, rgba(23, 16, 10, 0.92) 100%);
+  --grad-hairline: linear-gradient(90deg, transparent 0%, rgba(205, 154, 95, 0.45) 50%, transparent 100%);
 }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  overflow-x: hidden;
-  selection-background-color: #d4af37;
-  selection-color: #000000;
+@layer base {
+  body {
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    /* Josefin Sans tiene altura de x baja; un pelo de tracking la asienta */
+    letter-spacing: 0.012em;
+    overflow-x: hidden;
+    background-color: var(--background);
+    background-image:
+      radial-gradient(1100px 720px at 12% -12%, rgba(189, 132, 71, 0.16), transparent 62%),
+      radial-gradient(900px 640px at 96% 4%, rgba(123, 79, 45, 0.18), transparent 58%),
+      radial-gradient(1000px 900px at 50% 108%, rgba(93, 60, 36, 0.22), transparent 60%),
+      var(--grad-page);
+    background-attachment: fixed;
+  }
+
+  /* Grano sutil de café tostado sobre todo el lienzo */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: #0a0503;
+  }
 }
 
-.font-serif {
-  font-family: var(--font-serif);
+/* ============================================================
+   COMPONENTES DE GRADIENTE
+   Van en @layer components para que las utilidades de Tailwind
+   (hover:border-*, text-*, shadow-*) sigan pudiendo sobrescribirlos.
+   ============================================================ */
+@layer components {
+
+  /* Epígrafe déco: versalitas muy espaciadas en la display.
+     Siempre en peso 400 — Poiret One no tiene negrita. */
+  .eyebrow {
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.26em;
+  }
+
+  /* Titular déco: la display pide aire, nunca tracking negativo */
+  .display-heading {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  /* Texto con degradado crema → caramelo */
+  .text-gradient-coffee {
+    background-image: linear-gradient(175deg, #faf5ef 0%, #e2d4c3 42%, #cd9a5f 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Texto con degradado de acento (mocha puro) */
+  .text-gradient-mocha {
+    background-image: var(--grad-accent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Botón sólido de acento con degradado */
+  .btn-coffee {
+    background-image: var(--grad-accent);
+    color: #14100b;
+    box-shadow: 0 10px 30px -12px rgba(184, 120, 63, 0.65);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-coffee:hover {
+    background-image: var(--grad-accent-hover);
+    box-shadow: 0 16px 42px -12px rgba(219, 182, 138, 0.55);
+  }
+
+  /* Botón fantasma sobre café */
+  .btn-coffee-ghost {
+    background-image: linear-gradient(150deg, rgba(205, 154, 95, 0.14) 0%, rgba(123, 79, 45, 0.1) 100%);
+    border: 1px solid rgba(205, 154, 95, 0.28);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-coffee-ghost:hover {
+    background-image: var(--grad-accent);
+    border-color: rgba(219, 182, 138, 0.7);
+    color: #14100b;
+    box-shadow: 0 14px 36px -14px rgba(184, 120, 63, 0.7);
+  }
+
+  /* Barra de navegación de vidrio tostado */
+  .glass-nav {
+    background-image: linear-gradient(180deg, rgba(26, 17, 9, 0.9) 0%, rgba(18, 10, 6, 0.78) 100%);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border-bottom: 1px solid rgba(205, 154, 95, 0.16);
+  }
+
+  /* Tarjeta de vidrio con degradado café */
+  .glass-card {
+    background-image: var(--grad-surface);
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    border: 1px solid rgba(205, 154, 95, 0.14);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass-card:hover {
+    background-image: var(--grad-surface-hover);
+    border-color: rgba(205, 154, 95, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 26px 52px -20px rgba(10, 5, 3, 0.9), 0 0 0 1px rgba(205, 154, 95, 0.08);
+  }
+
+  /* Panel opaco (modales, formularios, dashboard) */
+  .coffee-panel {
+    background-image: linear-gradient(160deg, #2a1d12 0%, #1e150d 48%, #150e08 100%);
+    border: 1px solid rgba(205, 154, 95, 0.18);
+  }
+
+  /* Superficie de campo de formulario */
+  .coffee-field {
+    background-image: linear-gradient(160deg, rgba(10, 5, 3, 0.7) 0%, rgba(30, 21, 13, 0.55) 100%);
+    border: 1px solid rgba(205, 154, 95, 0.18);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .coffee-field:focus {
+    outline: none;
+    border-color: rgba(205, 154, 95, 0.65);
+    box-shadow: 0 0 0 3px rgba(205, 154, 95, 0.12);
+  }
+
+  /* Secciones alternas con degradado */
+  .section-roast {
+    background-image: linear-gradient(180deg, rgba(23, 16, 10, 0) 0%, rgba(30, 21, 13, 0.55) 45%, rgba(18, 10, 6, 0) 100%);
+  }
+
+  .section-crema {
+    background-image: linear-gradient(180deg, rgba(42, 29, 18, 0.55) 0%, rgba(23, 16, 10, 0.75) 50%, rgba(18, 10, 6, 0.55) 100%);
+  }
+
+  /* Línea divisoria con degradado */
+  .coffee-hairline {
+    height: 1px;
+    background-image: var(--grad-hairline);
+    border: 0;
+  }
+
+  /* Halo ambiental de café */
+  .coffee-glow {
+    background-image: radial-gradient(circle at center, rgba(205, 154, 95, 0.16) 0%, rgba(123, 79, 45, 0.08) 42%, transparent 72%);
+  }
+
+  /* Insignia / chip de acento */
+  .coffee-chip {
+    background-image: linear-gradient(135deg, rgba(233, 210, 179, 0.16) 0%, rgba(156, 103, 57, 0.14) 100%);
+    border: 1px solid rgba(205, 154, 95, 0.32);
+  }
+
+  /* Aro de icono con degradado */
+  .coffee-ring {
+    background-image: linear-gradient(140deg, rgba(205, 154, 95, 0.22) 0%, rgba(66, 43, 27, 0.5) 100%);
+    border: 1px solid rgba(205, 154, 95, 0.3);
+  }
 }
 
-.font-sans {
-  font-family: var(--font-sans);
+/* ============================================================
+   MOVIMIENTO
+   Piezas que viven mejor en CSS que en framer-motion: bucles largos
+   sobre capas fijas y estados de hover que no dependen de React.
+   ============================================================ */
+
+/* Ken Burns del hero: deriva lenta y continua sobre la foto de fondo.
+   El recorte llega al 12%, asi que las fotos deben tener aire en los bordes. */
+@keyframes ken-burns {
+  0% {
+    transform: scale(1.05) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.14) translate3d(-1.2%, -1.6%, 0);
+  }
+  100% {
+    transform: scale(1.05) translate3d(0, 0, 0);
+  }
 }
 
-/* Glassmorphism utilities */
-.glass-nav {
-  background: rgba(9, 10, 12, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+.animate-ken-burns {
+  animation: ken-burns 22s ease-in-out infinite;
+  will-change: transform;
 }
 
-.glass-card {
-  background: rgba(18, 20, 26, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+@layer components {
+  /* Enlace de navegacion: el subrayado se traza desde la izquierda al entrar
+     el puntero y se retira por la derecha al salir. */
+  .nav-link {
+    position: relative;
+    display: inline-block;
+  }
+
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.4rem;
+    height: 1px;
+    background-image: var(--grad-accent);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  /* Boton con relleno que barre de izquierda a derecha antes de asentarse.
+     Se aplica sobre .btn-coffee-ghost donde interese un gesto mas marcado. */
+  .btn-sweep {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .btn-sweep::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--grad-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-sweep:hover::before {
+    transform: scaleX(1);
+  }
 }
 
-.glass-card:hover {
-  background: rgba(26, 29, 38, 0.8);
-  border-color: rgba(212, 175, 55, 0.3);
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+/* ============================================================
+   ACCESIBILIDAD
+   Quien pide menos movimiento recibe la landing entera, sin recorridos:
+   los bucles se detienen y las transiciones se vuelven instantaneas.
+   framer-motion lo respeta por su cuenta via useReducedMotion.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-/* Custom Scrollbar */
+/* ============================================================
+   BARRA DE DESPLAZAMIENTO
+   ============================================================ */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #090a0c;
+  background-image: linear-gradient(180deg, #120a06 0%, #0a0503 100%);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #222630;
-  border-radius: 4px;
+  background-image: linear-gradient(180deg, #5d3c24 0%, #3a2818 100%);
+  border-radius: 6px;
+  border: 2px solid #120a06;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d4af37;
+  background-image: var(--grad-accent);
+}
+
+/* Firefox */
+* {
+  scrollbar-color: #5d3c24 #120a06;
 }

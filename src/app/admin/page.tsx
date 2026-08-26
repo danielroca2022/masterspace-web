@@ -2,10 +2,21 @@
 
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { 
-  Plus, Trash2, Image as ImageIcon, Lock, LogOut, 
-  Sparkles, Check, RefreshCw, FolderPlus, Users, Eye, ArrowLeft 
+import {
+  Plus, Trash2, Lock, LogOut,
+  Sparkles, Check, RefreshCw, FolderPlus, Users, ArrowLeft,
+  Settings, Save, Phone, Mail
 } from "lucide-react";
+import BrandLogo from "@/components/BrandLogo";
+import { PROJECT_CATEGORIES } from "@/lib/constants";
+import {
+  DEFAULT_SITE_SETTINGS,
+  buildWhatsAppUrl,
+  fetchSiteSettings,
+  normalizeWhatsAppNumber,
+  saveSiteSettings,
+  type SiteSettings,
+} from "@/lib/site-settings";
 
 interface ProjectItem {
   id?: string;
@@ -28,21 +39,34 @@ interface LeadItem {
   created_at: string;
 }
 
+const SOCIAL_FIELDS: { field: keyof SiteSettings; label: string; placeholder: string }[] = [
+  { field: "instagram", label: "Instagram", placeholder: "https://instagram.com/masterspace.nyc" },
+  { field: "facebook", label: "Facebook", placeholder: "https://facebook.com/masterspacenyc" },
+  { field: "tiktok", label: "TikTok", placeholder: "https://tiktok.com/@masterspace.nyc" },
+  { field: "pinterest", label: "Pinterest", placeholder: "https://pinterest.com/masterspacenyc" },
+  { field: "youtube", label: "YouTube", placeholder: "https://youtube.com/@masterspacenyc" },
+];
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState("");
   const [pinError, setPinError] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<"projects" | "leads">("projects");
+  const [activeTab, setActiveTab] = useState<"projects" | "leads" | "settings">("projects");
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [leads, setLeads] = useState<LeadItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
+  // Contacto & redes: se publican en la landing (footer + boton flotante)
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsError, setSettingsError] = useState("");
+
   // New Project Form state
   const [newProject, setNewProject] = useState<ProjectItem>({
     title: "",
-    category: "Kitchens",
+    category: PROJECT_CATEGORIES[0],
     location: "Manhattan, NYC",
     image_url: "",
     details: "",
@@ -93,6 +117,9 @@ export default function AdminPage() {
         .order("created_at", { ascending: false });
 
       if (leadData) setLeads(leadData);
+
+      // Ajustes de contacto y redes
+      setSettings(await fetchSiteSettings());
     } catch (err) {
       console.error("Error fetching data:", err);
     } finally {
@@ -125,7 +152,7 @@ export default function AdminPage() {
       setProjects([data[0], ...projects]);
       setNewProject({
         title: "",
-        category: "Kitchens",
+        category: PROJECT_CATEGORIES[0],
         location: "Manhattan, NYC",
         image_url: "",
         details: "",
@@ -146,25 +173,53 @@ export default function AdminPage() {
     }
   };
 
+  const updateSetting = (field: keyof SiteSettings, value: string) => {
+    setSettings((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingSettings(true);
+    setSettingsError("");
+
+    const payload: SiteSettings = {
+      ...settings,
+      whatsappNumber: normalizeWhatsAppNumber(settings.whatsappNumber),
+    };
+
+    const { error } = await saveSiteSettings(payload);
+
+    if (error) {
+      setSettingsError("No se pudo guardar. Revisa tu conexion e intenta de nuevo.");
+    } else {
+      setSettings(payload);
+      setSuccessMsg("Contacto y redes actualizados en la web live.");
+      setTimeout(() => setSuccessMsg(""), 3000);
+    }
+    setSavingSettings(false);
+  };
+
+  const whatsappPreviewUrl = buildWhatsAppUrl(settings);
+  const activeSocials = SOCIAL_FIELDS.filter(({ field }) => settings[field]);
+
   // PIN Login Gate Screen
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#090a0c] text-white flex items-center justify-center p-6">
-        <div className="w-full max-w-md bg-[#12141a] border border-white/10 rounded-3xl p-8 shadow-2xl text-center">
-          <div className="w-14 h-14 rounded-full bg-[#d4af37]/20 border border-[#d4af37] text-[#d4af37] flex items-center justify-center mx-auto mb-6">
+      <div className="min-h-screen bg-linear-to-br from-espresso-800 via-espresso-900 to-espresso-950 text-latte-100 flex items-center justify-center p-6">
+        <div className="relative w-full max-w-md coffee-panel rounded-3xl p-8 shadow-2xl shadow-espresso-950/70 text-center overflow-hidden">
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-80 coffee-glow blur-3xl pointer-events-none" />
+          <div className="relative w-14 h-14 rounded-full bg-linear-to-br from-mocha-200 to-mocha-700 text-espresso-950 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-mocha-700/40">
             <Lock className="w-6 h-6" />
           </div>
 
-          <span className="font-serif text-3xl font-normal text-white block mb-1">
-            masterspace
-          </span>
-          <p className="text-xs uppercase tracking-[0.2em] text-[#d4af37] font-semibold mb-6">
+          <BrandLogo priority className="relative h-24 w-auto mx-auto mb-3" />
+          <p className="relative eyebrow text-xs text-gradient-mocha mb-6">
             Panel de Administración CMS
           </p>
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
+          <form onSubmit={handleLogin} className="relative flex flex-col gap-4">
             <div>
-              <label className="block text-left text-xs uppercase tracking-wider text-neutral-400 mb-2">
+              <label className="block text-left text-xs uppercase tracking-wider text-latte-400 mb-2">
                 Ingresa el PIN de Acceso (Por defecto: 1234)
               </label>
               <input
@@ -173,16 +228,16 @@ export default function AdminPage() {
                 placeholder="****"
                 value={pinInput}
                 onChange={(e) => setPinInput(e.target.value)}
-                className="w-full px-4 py-3 text-center text-xl font-mono tracking-widest rounded-xl bg-black/50 border border-white/15 text-white focus:outline-none focus:border-[#d4af37]"
+                className="w-full px-4 py-3 text-center text-xl font-mono tracking-widest rounded-xl coffee-field text-latte-100"
               />
               {pinError && (
-                <p className="text-red-400 text-xs mt-2">PIN incorrecto. Intenta con 1234.</p>
+                <p className="text-terracotta-400 text-xs mt-2">PIN incorrecto. Intenta con 1234.</p>
               )}
             </div>
 
             <button
               type="submit"
-              className="w-full py-3.5 rounded-xl bg-[#d4af37] text-black font-semibold text-xs uppercase tracking-[0.2em] hover:bg-[#f3e5ab] transition-colors"
+              className="btn-coffee w-full py-3.5 rounded-xl font-semibold text-xs uppercase tracking-[0.2em]"
             >
               Ingresar al Panel
             </button>
@@ -194,19 +249,19 @@ export default function AdminPage() {
 
   // Authenticated Admin Dashboard UI
   return (
-    <div className="min-h-screen bg-[#090a0c] text-white">
+    <div className="min-h-screen bg-linear-to-b from-espresso-900 via-espresso-900 to-espresso-950 text-latte-100">
       {/* Top Header */}
-      <header className="border-b border-white/10 bg-[#12141a] px-6 py-4 sticky top-0 z-40">
+      <header className="relative border-b border-mocha-500/20 bg-linear-to-b from-espresso-700 to-espresso-800 px-6 py-4 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <a href="/" className="text-neutral-400 hover:text-white flex items-center gap-1.5 text-xs uppercase tracking-wider">
+            <a href="/" className="text-latte-400 hover:text-latte-50 flex items-center gap-1.5 text-xs uppercase tracking-wider">
               <ArrowLeft className="w-4 h-4" />
               <span>Ver Web Principal</span>
             </a>
-            <span className="text-neutral-700">|</span>
+            <span className="text-latte-700">|</span>
             <div className="flex items-center gap-2">
-              <span className="font-serif text-xl font-normal text-white">masterspace</span>
-              <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded bg-[#d4af37] text-black font-bold">
+              <BrandLogo priority className="h-11 w-auto" />
+              <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded bg-linear-to-r from-mocha-200 to-mocha-500 text-espresso-950 font-bold">
                 CMS ADMIN
               </span>
             </div>
@@ -214,7 +269,7 @@ export default function AdminPage() {
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-xs uppercase tracking-wider text-neutral-400 hover:text-red-400 transition-colors"
+            className="flex items-center gap-2 text-xs uppercase tracking-wider text-latte-400 hover:text-terracotta-400 transition-colors"
           >
             <span>Cerrar Sesión</span>
             <LogOut className="w-4 h-4" />
@@ -226,20 +281,21 @@ export default function AdminPage() {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Success Banner */}
         {successMsg && (
-          <div className="mb-6 p-4 rounded-xl bg-[#d4af37]/20 border border-[#d4af37] text-[#f3e5ab] text-sm flex items-center gap-2">
+          <div className="mb-6 p-4 rounded-xl bg-linear-to-r from-mocha-600/30 to-mocha-800/20 border border-mocha-400/45 text-mocha-100 text-sm flex items-center gap-2">
             <Check className="w-5 h-5" />
             <span>{successMsg}</span>
           </div>
         )}
 
         {/* Tab Switcher */}
-        <div className="flex items-center gap-4 mb-8 border-b border-white/10 pb-4">
+        <div className="relative flex items-center gap-4 mb-8 pb-4">
+          <div className="absolute bottom-0 inset-x-0 coffee-hairline" />
           <button
             onClick={() => setActiveTab("projects")}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs uppercase tracking-widest font-semibold transition-all ${
               activeTab === "projects"
-                ? "bg-[#d4af37] text-black shadow-lg shadow-[#d4af37]/20"
-                : "bg-white/5 text-neutral-400 hover:text-white"
+                ? "btn-coffee"
+                : "bg-linear-to-b from-mocha-400/10 to-mocha-700/10 border border-mocha-500/20 text-latte-400 hover:text-latte-100 hover:border-mocha-400/40"
             }`}
           >
             <FolderPlus className="w-4 h-4" />
@@ -250,8 +306,8 @@ export default function AdminPage() {
             onClick={() => setActiveTab("leads")}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs uppercase tracking-widest font-semibold transition-all ${
               activeTab === "leads"
-                ? "bg-[#d4af37] text-black shadow-lg shadow-[#d4af37]/20"
-                : "bg-white/5 text-neutral-400 hover:text-white"
+                ? "btn-coffee"
+                : "bg-linear-to-b from-mocha-400/10 to-mocha-700/10 border border-mocha-500/20 text-latte-400 hover:text-latte-100 hover:border-mocha-400/40"
             }`}
           >
             <Users className="w-4 h-4" />
@@ -259,8 +315,20 @@ export default function AdminPage() {
           </button>
 
           <button
+            onClick={() => setActiveTab("settings")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs uppercase tracking-widest font-semibold transition-all ${
+              activeTab === "settings"
+                ? "btn-coffee"
+                : "bg-linear-to-b from-mocha-400/10 to-mocha-700/10 border border-mocha-500/20 text-latte-400 hover:text-latte-100 hover:border-mocha-400/40"
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            <span>Contacto &amp; Redes</span>
+          </button>
+
+          <button
             onClick={fetchData}
-            className="ml-auto text-neutral-400 hover:text-white p-2 rounded-lg bg-white/5 border border-white/10"
+            className="ml-auto text-latte-400 hover:text-mocha-200 p-2 rounded-lg coffee-ring"
             title="Recargar datos"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -271,17 +339,17 @@ export default function AdminPage() {
         {activeTab === "projects" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Left Form: Add New Project */}
-            <div className="lg:col-span-5 bg-[#12141a] border border-white/10 rounded-2xl p-6 h-fit">
+            <div className="lg:col-span-5 coffee-panel rounded-2xl p-6 h-fit">
               <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-4 h-4 text-[#d4af37]" />
-                <h3 className="font-serif text-xl text-white font-normal">
+                <Sparkles className="w-4 h-4 text-mocha-300" />
+                <h3 className="font-display text-xl text-gradient-coffee font-normal">
                   Subir Trabajo Real
                 </h3>
               </div>
 
               <form onSubmit={handleCreateProject} className="flex flex-col gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-neutral-400 mb-1">
+                  <label className="block text-xs uppercase tracking-wider text-latte-400 mb-1">
                     Título del Proyecto
                   </label>
                   <input
@@ -290,28 +358,30 @@ export default function AdminPage() {
                     placeholder="Ej. Penthouse Upper East Side"
                     value={newProject.title}
                     onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border border-white/15 text-white text-sm focus:outline-none focus:border-[#d4af37]"
+                    className="w-full px-4 py-2.5 rounded-xl coffee-field text-latte-100 text-sm"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs uppercase tracking-wider text-neutral-400 mb-1">
+                    <label className="block text-xs uppercase tracking-wider text-latte-400 mb-1">
                       Categoría
                     </label>
                     <select
                       value={newProject.category}
                       onChange={(e) => setNewProject({ ...newProject, category: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-black/50 border border-white/15 text-white text-sm focus:outline-none focus:border-[#d4af37]"
+                      className="w-full px-3 py-2.5 rounded-xl coffee-field text-latte-100 text-sm"
                     >
-                      <option value="Kitchens" className="bg-[#12141a]">Kitchens</option>
-                      <option value="Wardrobes" className="bg-[#12141a]">Wardrobes</option>
-                      <option value="Living Spaces" className="bg-[#12141a]">Living Spaces</option>
+                      {PROJECT_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat} className="bg-espresso-800">
+                          {cat}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-xs uppercase tracking-wider text-neutral-400 mb-1">
+                    <label className="block text-xs uppercase tracking-wider text-latte-400 mb-1">
                       Ubicación (NYC)
                     </label>
                     <input
@@ -320,14 +390,14 @@ export default function AdminPage() {
                       placeholder="Ej. Brooklyn Heights"
                       value={newProject.location}
                       onChange={(e) => setNewProject({ ...newProject, location: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-black/50 border border-white/15 text-white text-sm focus:outline-none focus:border-[#d4af37]"
+                      className="w-full px-3 py-2.5 rounded-xl coffee-field text-latte-100 text-sm"
                     />
                   </div>
                 </div>
 
                 {/* Upload Image Section */}
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-neutral-400 mb-1">
+                  <label className="block text-xs uppercase tracking-wider text-latte-400 mb-1">
                     Imagen del Trabajo Real
                   </label>
                   <div className="flex flex-col gap-2">
@@ -335,9 +405,9 @@ export default function AdminPage() {
                       type="file"
                       accept="image/*"
                       onChange={handleImageFileUpload}
-                      className="text-xs text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#d4af37] file:text-black hover:file:bg-[#f3e5ab] cursor-pointer"
+                      className="text-xs text-latte-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-mocha-500 file:text-espresso-950 hover:file:bg-mocha-300 cursor-pointer"
                     />
-                    <span className="text-[10px] text-neutral-500 uppercase tracking-widest text-center">
+                    <span className="text-[10px] text-latte-500 uppercase tracking-widest text-center">
                       — o Pega la URL de la foto —
                     </span>
                     <input
@@ -345,20 +415,20 @@ export default function AdminPage() {
                       placeholder="https://ejemplo.com/foto-real.jpg"
                       value={newProject.image_url}
                       onChange={(e) => setNewProject({ ...newProject, image_url: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl bg-black/50 border border-white/15 text-white text-xs focus:outline-none focus:border-[#d4af37]"
+                      className="w-full px-3 py-2 rounded-xl coffee-field text-latte-100 text-xs"
                     />
                   </div>
 
                   {/* Preview box */}
                   {newProject.image_url && (
-                    <div className="mt-3 relative h-40 rounded-xl overflow-hidden border border-white/20">
+                    <div className="mt-3 relative h-40 rounded-xl overflow-hidden border border-mocha-400/25">
                       <img src={newProject.image_url} alt="Preview" className="w-full h-full object-cover" />
                     </div>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-neutral-400 mb-1">
+                  <label className="block text-xs uppercase tracking-wider text-latte-400 mb-1">
                     Descripción / Detalles
                   </label>
                   <textarea
@@ -366,14 +436,14 @@ export default function AdminPage() {
                     placeholder="Detalles sobre materiales, maderas u acabado..."
                     value={newProject.details}
                     onChange={(e) => setNewProject({ ...newProject, details: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-black/50 border border-white/15 text-white text-sm focus:outline-none focus:border-[#d4af37] resize-none"
+                    className="w-full px-4 py-2.5 rounded-xl coffee-field text-latte-100 text-sm resize-none"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 rounded-xl bg-[#d4af37] text-black font-semibold text-xs uppercase tracking-[0.2em] hover:bg-[#f3e5ab] transition-colors flex items-center justify-center gap-2 shadow-lg shadow-[#d4af37]/20"
+                  className="btn-coffee w-full py-3 rounded-xl font-semibold text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Publicar en la Web Live</span>
@@ -383,19 +453,19 @@ export default function AdminPage() {
 
             {/* Right List: Active Projects */}
             <div className="lg:col-span-7 space-y-4">
-              <h3 className="font-serif text-xl text-white font-normal mb-4">
+              <h3 className="font-display text-xl text-gradient-coffee font-normal mb-4">
                 Trabajos Publicados en la Web ({projects.length})
               </h3>
 
               {projects.length === 0 ? (
-                <div className="p-8 text-center bg-[#12141a] border border-white/10 rounded-2xl text-neutral-400 text-sm">
+                <div className="p-8 text-center coffee-panel rounded-2xl text-latte-400 text-sm">
                   No hay proyectos dinámicos aún. ¡Agrega el primero a la izquierda!
                 </div>
               ) : (
                 projects.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-[#12141a] border border-white/10 hover:border-white/25 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4 transition-all"
+                    className="coffee-panel rounded-2xl hover:border-mocha-400/40 p-4 flex flex-col sm:flex-row items-center gap-4 transition-all"
                   >
                     <img
                       src={item.image_url}
@@ -403,18 +473,18 @@ export default function AdminPage() {
                       className="w-full sm:w-28 h-24 rounded-xl object-cover shrink-0"
                     />
                     <div className="flex-1 w-full">
-                      <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[#d4af37]">
+                      <div className="flex items-center gap-2 eyebrow text-[11px] text-mocha-300">
                         <span>{item.category}</span>
                         <span>•</span>
                         <span>{item.location}</span>
                       </div>
-                      <h4 className="font-serif text-lg text-white font-normal">{item.title}</h4>
-                      <p className="text-xs text-neutral-400 font-light line-clamp-1">{item.details}</p>
+                      <h4 className="font-display text-lg text-latte-50 font-normal">{item.title}</h4>
+                      <p className="text-xs text-latte-400 font-light line-clamp-1">{item.details}</p>
                     </div>
 
                     <button
                       onClick={() => handleDeleteProject(item.id)}
-                      className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-colors"
+                      className="p-2.5 rounded-xl bg-terracotta-500/10 border border-terracotta-500/20 text-terracotta-400 hover:bg-terracotta-500 hover:text-latte-50 transition-colors"
                       title="Eliminar de la web"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -429,36 +499,36 @@ export default function AdminPage() {
         {/* TAB 2: LEADS INBOX */}
         {activeTab === "leads" && (
           <div className="space-y-4">
-            <h3 className="font-serif text-xl text-white font-normal mb-4">
+            <h3 className="font-display text-xl text-gradient-coffee font-normal mb-4">
               Consultas Recibidas de Clientes ({leads.length})
             </h3>
 
             {leads.length === 0 ? (
-              <div className="p-8 text-center bg-[#12141a] border border-white/10 rounded-2xl text-neutral-400 text-sm">
+              <div className="p-8 text-center coffee-panel rounded-2xl text-latte-400 text-sm">
                 Aún no has recibido consultas de clientes. Se mostrarán aquí automáticamente cuando llenen el formulario web.
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {leads.map((lead) => (
-                  <div key={lead.id} className="bg-[#12141a] border border-white/10 rounded-2xl p-6 flex flex-col justify-between">
+                  <div key={lead.id} className="coffee-panel rounded-2xl p-6 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="px-3 py-1 rounded-full bg-[#d4af37]/20 border border-[#d4af37]/40 text-[#f3e5ab] text-[10px] uppercase tracking-widest font-semibold">
+                        <span className="px-3 py-1 rounded-full bg-linear-to-r from-mocha-500/25 to-mocha-800/20 border border-mocha-400/40 text-mocha-100 text-[10px] uppercase tracking-widest font-semibold">
                           {lead.borough} • {lead.project_type}
                         </span>
-                        <span className="text-[10px] text-neutral-500">
+                        <span className="text-[10px] text-latte-500">
                           {new Date(lead.created_at).toLocaleDateString()}
                         </span>
                       </div>
 
-                      <h4 className="font-serif text-2xl text-white font-normal mb-1">{lead.name}</h4>
-                      <div className="text-xs text-neutral-300 space-y-1 mb-4">
-                        <p>📞 <span className="font-mono text-white">{lead.phone}</span></p>
-                        <p>✉️ <span className="font-mono text-white">{lead.email}</span></p>
+                      <h4 className="font-display text-2xl text-latte-50 font-normal mb-1">{lead.name}</h4>
+                      <div className="text-xs text-latte-300 space-y-1 mb-4">
+                        <p>📞 <span className="font-mono text-latte-50">{lead.phone}</span></p>
+                        <p>✉️ <span className="font-mono text-latte-50">{lead.email}</span></p>
                       </div>
 
                       {lead.details && (
-                        <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-xs text-neutral-300 italic">
+                        <div className="p-3 rounded-xl bg-espresso-950/60 border border-mocha-500/12 text-xs text-latte-300 italic">
                           "{lead.details}"
                         </div>
                       )}
@@ -467,6 +537,188 @@ export default function AdminPage() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* TAB 3: CONTACTO & REDES (se refleja en la landing) */}
+        {activeTab === "settings" && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <form onSubmit={handleSaveSettings} className="lg:col-span-8 coffee-panel rounded-2xl p-6 flex flex-col gap-6">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Settings className="w-4 h-4 text-mocha-300" />
+                  <h3 className="font-display text-xl text-gradient-coffee font-normal">
+                    Contacto &amp; Redes Sociales
+                  </h3>
+                </div>
+                <p className="text-xs text-latte-400 font-light">
+                  Lo que guardes aqui aparece al instante en el footer y en el boton flotante de WhatsApp de la web.
+                </p>
+              </div>
+
+              {/* WhatsApp */}
+              <div className="pt-5 relative">
+                <div className="absolute top-0 inset-x-0 coffee-hairline" />
+                <h4 className="eyebrow text-[11px] text-mocha-300 mb-4">WhatsApp</h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-latte-400 mb-1">
+                      Numero (con codigo de pais)
+                    </label>
+                    <input
+                      type="tel"
+                      inputMode="tel"
+                      placeholder="1 212 555 0199"
+                      value={settings.whatsappNumber}
+                      onChange={(e) => updateSetting("whatsappNumber", e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl coffee-field text-latte-100 text-sm"
+                    />
+                    <p className="text-[10px] text-latte-500 mt-1">
+                      Solo digitos: 1 = USA. Dejalo vacio para ocultar el boton de WhatsApp.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-latte-400 mb-1">
+                      Mensaje precargado
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Hello MasterSpace, I would like..."
+                      value={settings.whatsappMessage}
+                      onChange={(e) => updateSetting("whatsappMessage", e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl coffee-field text-latte-100 text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Contacto directo */}
+              <div className="pt-5 relative">
+                <div className="absolute top-0 inset-x-0 coffee-hairline" />
+                <h4 className="eyebrow text-[11px] text-mocha-300 mb-4">Contacto directo</h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-latte-400 mb-1">
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>Telefono</span>
+                    </label>
+                    <input
+                      type="tel"
+                      placeholder="(212) 555-0199"
+                      value={settings.phone}
+                      onChange={(e) => updateSetting("phone", e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl coffee-field text-latte-100 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-latte-400 mb-1">
+                      <Mail className="w-3.5 h-3.5" />
+                      <span>Email</span>
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="hello@masterspace.nyc"
+                      value={settings.email}
+                      onChange={(e) => updateSetting("email", e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl coffee-field text-latte-100 text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Redes */}
+              <div className="pt-5 relative">
+                <div className="absolute top-0 inset-x-0 coffee-hairline" />
+                <h4 className="eyebrow text-[11px] text-mocha-300 mb-4">Redes sociales</h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {SOCIAL_FIELDS.map(({ field, label, placeholder }) => (
+                    <div key={field}>
+                      <label className="block text-xs uppercase tracking-wider text-latte-400 mb-1">
+                        {label}
+                      </label>
+                      <input
+                        type="url"
+                        placeholder={placeholder}
+                        value={settings[field]}
+                        onChange={(e) => updateSetting(field, e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl coffee-field text-latte-100 text-sm"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[10px] text-latte-500 mt-3">
+                  Deja en blanco las redes que no uses y su icono no se mostrara en la web.
+                </p>
+              </div>
+
+              {settingsError && (
+                <p className="text-terracotta-400 text-xs">{settingsError}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={savingSettings}
+                className="btn-coffee w-full py-3 rounded-xl font-semibold text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                <Save className="w-4 h-4" />
+                <span>{savingSettings ? "Guardando..." : "Publicar en la Web Live"}</span>
+              </button>
+            </form>
+
+            {/* Vista previa de lo que vera el cliente */}
+            <div className="lg:col-span-4 coffee-panel rounded-2xl p-6 h-fit">
+              <h3 className="font-display text-xl text-gradient-coffee font-normal mb-4">
+                Vista Previa
+              </h3>
+
+              <div className="flex flex-col gap-3 text-xs">
+                <div>
+                  <span className="eyebrow text-[10px] text-mocha-300 block mb-1">Boton WhatsApp</span>
+                  {whatsappPreviewUrl ? (
+                    <a
+                      href={whatsappPreviewUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-latte-200 hover:text-mocha-300 break-all underline underline-offset-2"
+                    >
+                      {whatsappPreviewUrl}
+                    </a>
+                  ) : (
+                    <span className="text-latte-500">Oculto &mdash; falta el numero.</span>
+                  )}
+                </div>
+
+                <div className="pt-3 relative">
+                  <div className="absolute top-0 inset-x-0 coffee-hairline" />
+                  <span className="eyebrow text-[10px] text-mocha-300 block mb-1">
+                    Iconos visibles en el footer
+                  </span>
+                  {activeSocials.length === 0 ? (
+                    <span className="text-latte-500">Ninguno todavia.</span>
+                  ) : (
+                    <ul className="text-latte-200 space-y-1">
+                      {activeSocials.map(({ field, label }) => (
+                        <li key={field}>&bull; {label}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <a
+                  href="/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-coffee-ghost mt-2 flex items-center justify-center px-4 py-2.5 rounded-full text-latte-100 text-[11px] uppercase tracking-[0.18em] font-semibold"
+                >
+                  Abrir la web
+                </a>
+              </div>
+            </div>
           </div>
         )}
       </main>

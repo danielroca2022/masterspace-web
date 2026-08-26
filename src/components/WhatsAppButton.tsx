@@ -2,10 +2,15 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { useSiteSettings } from "@/components/SiteSettingsProvider";
+import { buildWhatsAppUrl } from "@/lib/site-settings";
 
 export default function WhatsAppButton() {
-  // WhatsApp official URL with pre-filled MasterSpace message
-  const whatsappUrl = "https://wa.me/12125550199?text=Hello%20MasterSpace%2C%20I%20would%20like%20to%20inquire%20about%20a%20custom%20interior%203D%20design.";
+  // Numero y mensaje se administran desde /admin > Contacto & Redes
+  const settings = useSiteSettings();
+  const whatsappUrl = buildWhatsAppUrl(settings);
+
+  if (!whatsappUrl) return null;
 
   return (
     <motion.a
@@ -17,11 +22,11 @@ export default function WhatsAppButton() {
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed bottom-6 right-6 z-40 group flex items-center justify-center p-3.5 rounded-full bg-[#25D366] text-white shadow-2xl hover:shadow-[#25D366]/40 border border-white/20"
+      className="fixed bottom-6 right-6 z-40 group flex items-center justify-center p-3.5 rounded-full bg-linear-to-br from-mocha-200 via-mocha-500 to-mocha-800 text-espresso-950 shadow-2xl shadow-espresso-950/60 hover:shadow-mocha-600/50 border border-mocha-200/40"
       aria-label="Chat on WhatsApp with MasterSpace"
     >
       {/* Subtle pulse effect ring */}
-      <span className="absolute -inset-1 rounded-full bg-[#25D366] opacity-40 group-hover:opacity-75 animate-ping pointer-events-none" />
+      <span className="absolute -inset-1 rounded-full bg-linear-to-br from-mocha-300 to-mocha-700 opacity-40 group-hover:opacity-75 animate-ping pointer-events-none" />
 
       {/* Official WhatsApp SVG Icon */}
       <svg

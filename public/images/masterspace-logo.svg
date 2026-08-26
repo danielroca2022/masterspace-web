@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 415 218" width="415" height="218" role="img" aria-label="MasterSpace Interior Design">
+  <title>MasterSpace — Interior Design</title>
+  <g fill="none" fill-rule="evenodd">
+    <!-- Monograma MS dentro del marco dorado -->
+    <rect x="170" y="15" width="75" height="75" stroke="#C6A15C" stroke-width="2.5" />
+    <text x="206.5" y="65"
+          font-family="Cormorant Garamond, Playfair Display, Didot, Bodoni MT, Times New Roman, Times, serif"
+          font-size="36" letter-spacing="2" text-anchor="middle" fill="#C6A15C">MS</text>
+
+    <!-- Wordmark -->
+    <text x="210" y="152"
+          font-family="Cormorant Garamond, Playfair Display, Didot, Bodoni MT, Times New Roman, Times, serif"
+          font-size="41" letter-spacing="5" text-anchor="middle" fill="#F7F3EC">MASTERSPACE</text>
+
+    <!-- Filete dorado -->
+    <path d="M147 173.5 H268" stroke="#C6A15C" stroke-width="2" />
+
+    <!-- Bajada -->
+    <text x="210" y="198"
+          font-family="Cormorant Garamond, Playfair Display, Didot, Bodoni MT, Times New Roman, Times, serif"
+          font-size="13.5" letter-spacing="5.5" text-anchor="middle" fill="#C6A15C">INTERIOR DESIGN</text>
+  </g>
+</svg>
