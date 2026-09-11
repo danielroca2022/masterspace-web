@@ -14,17 +14,17 @@
   --color-espresso-600: #3a2818;
   --color-espresso-500: #4d3520;
 
-  /* Mocha — acento cálido (sustituye al dorado) */
-  --color-mocha-50: #fbf6ef;
-  --color-mocha-100: #f4e8d8;
-  --color-mocha-200: #e9d2b3;
-  --color-mocha-300: #dbb68a;
-  --color-mocha-400: #cd9a5f;
-  --color-mocha-500: #bd8447;
-  --color-mocha-600: #9c6739;
-  --color-mocha-700: #7b4f2d;
-  --color-mocha-800: #5d3c24;
-  --color-mocha-900: #422b1b;
+  /* Mocha — acento dorado (oro amarillo, alineado al logo) */
+  --color-mocha-50: #fdf8e8;
+  --color-mocha-100: #f9eec8;
+  --color-mocha-200: #f2dd92;
+  --color-mocha-300: #e8c75a;
+  --color-mocha-400: #d4af37;
+  --color-mocha-500: #bf9a24;
+  --color-mocha-600: #9c7d1b;
+  --color-mocha-700: #7a6118;
+  --color-mocha-800: #5a4815;
+  --color-mocha-900: #3e3211;
 
   /* Latte — neutros cálidos para tipografía */
   --color-latte-50: #faf5ef;
@@ -55,18 +55,18 @@
   --background: #120a06;
   --foreground: #f5ede2;
   --card: #1e150d;
-  --card-border: rgba(205, 154, 95, 0.16);
-  --accent: #cd9a5f;
-  --accent-strong: #bd8447;
-  --accent-light: #e9d2b3;
+  --card-border: rgba(212, 175, 55, 0.16);
+  --accent: #d4af37;
+  --accent-strong: #bf9a24;
+  --accent-light: #f2dd92;
 
   /* Gradientes reutilizables de la escala café */
   --grad-page: linear-gradient(180deg, #1a1109 0%, #120a06 42%, #0d0704 100%);
-  --grad-accent: linear-gradient(135deg, #e9d2b3 0%, #cd9a5f 38%, #b8783f 72%, #8a5730 100%);
-  --grad-accent-hover: linear-gradient(135deg, #f4e8d8 0%, #dbb68a 40%, #cd9a5f 75%, #a06a38 100%);
+  --grad-accent: linear-gradient(135deg, #f2dd92 0%, #d4af37 38%, #bf9a24 72%, #8c711a 100%);
+  --grad-accent-hover: linear-gradient(135deg, #f9eec8 0%, #e8c75a 40%, #d4af37 75%, #9c7d1b 100%);
   --grad-surface: linear-gradient(155deg, rgba(48, 33, 20, 0.72) 0%, rgba(30, 21, 13, 0.82) 45%, rgba(18, 10, 6, 0.88) 100%);
   --grad-surface-hover: linear-gradient(155deg, rgba(66, 45, 27, 0.85) 0%, rgba(42, 29, 18, 0.9) 45%, rgba(23, 16, 10, 0.92) 100%);
-  --grad-hairline: linear-gradient(90deg, transparent 0%, rgba(205, 154, 95, 0.45) 50%, transparent 100%);
+  --grad-hairline: linear-gradient(90deg, transparent 0%, rgba(212, 175, 55, 0.45) 50%, transparent 100%);
 }
 
 @layer base {
@@ -78,9 +78,9 @@
     overflow-x: hidden;
     background-color: var(--background);
     background-image:
-      radial-gradient(1100px 720px at 12% -12%, rgba(189, 132, 71, 0.16), transparent 62%),
-      radial-gradient(900px 640px at 96% 4%, rgba(123, 79, 45, 0.18), transparent 58%),
-      radial-gradient(1000px 900px at 50% 108%, rgba(93, 60, 36, 0.22), transparent 60%),
+      radial-gradient(1100px 720px at 12% -12%, rgba(191, 154, 36, 0.16), transparent 62%),
+      radial-gradient(900px 640px at 96% 4%, rgba(122, 97, 24, 0.18), transparent 58%),
+      radial-gradient(1000px 900px at 50% 108%, rgba(90, 72, 21, 0.22), transparent 60%),
       var(--grad-page);
     background-attachment: fixed;
   }
@@ -127,7 +127,7 @@
 
   /* Texto con degradado crema → caramelo */
   .text-gradient-coffee {
-    background-image: linear-gradient(175deg, #faf5ef 0%, #e2d4c3 42%, #cd9a5f 100%);
+    background-image: linear-gradient(175deg, #faf5ef 0%, #e2d4c3 42%, #d4af37 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -145,27 +145,27 @@
   .btn-coffee {
     background-image: var(--grad-accent);
     color: #14100b;
-    box-shadow: 0 10px 30px -12px rgba(184, 120, 63, 0.65);
+    box-shadow: 0 10px 30px -12px rgba(191, 154, 36, 0.65);
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .btn-coffee:hover {
     background-image: var(--grad-accent-hover);
-    box-shadow: 0 16px 42px -12px rgba(219, 182, 138, 0.55);
+    box-shadow: 0 16px 42px -12px rgba(232, 199, 90, 0.55);
   }
 
   /* Botón fantasma sobre café */
   .btn-coffee-ghost {
-    background-image: linear-gradient(150deg, rgba(205, 154, 95, 0.14) 0%, rgba(123, 79, 45, 0.1) 100%);
-    border: 1px solid rgba(205, 154, 95, 0.28);
+    background-image: linear-gradient(150deg, rgba(212, 175, 55, 0.14) 0%, rgba(122, 97, 24, 0.1) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.28);
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .btn-coffee-ghost:hover {
     background-image: var(--grad-accent);
-    border-color: rgba(219, 182, 138, 0.7);
+    border-color: rgba(232, 199, 90, 0.7);
     color: #14100b;
-    box-shadow: 0 14px 36px -14px rgba(184, 120, 63, 0.7);
+    box-shadow: 0 14px 36px -14px rgba(191, 154, 36, 0.7);
   }
 
   /* Barra de navegación de vidrio tostado */
@@ -173,7 +173,7 @@
     background-image: linear-gradient(180deg, rgba(26, 17, 9, 0.9) 0%, rgba(18, 10, 6, 0.78) 100%);
     backdrop-filter: blur(18px) saturate(140%);
     -webkit-backdrop-filter: blur(18px) saturate(140%);
-    border-bottom: 1px solid rgba(205, 154, 95, 0.16);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.16);
   }
 
   /* Tarjeta de vidrio con degradado café */
@@ -181,34 +181,34 @@
     background-image: var(--grad-surface);
     backdrop-filter: blur(14px) saturate(130%);
     -webkit-backdrop-filter: blur(14px) saturate(130%);
-    border: 1px solid rgba(205, 154, 95, 0.14);
+    border: 1px solid rgba(212, 175, 55, 0.14);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .glass-card:hover {
     background-image: var(--grad-surface-hover);
-    border-color: rgba(205, 154, 95, 0.4);
+    border-color: rgba(212, 175, 55, 0.4);
     transform: translateY(-4px);
-    box-shadow: 0 26px 52px -20px rgba(10, 5, 3, 0.9), 0 0 0 1px rgba(205, 154, 95, 0.08);
+    box-shadow: 0 26px 52px -20px rgba(10, 5, 3, 0.9), 0 0 0 1px rgba(212, 175, 55, 0.08);
   }
 
   /* Panel opaco (modales, formularios, dashboard) */
   .coffee-panel {
     background-image: linear-gradient(160deg, #2a1d12 0%, #1e150d 48%, #150e08 100%);
-    border: 1px solid rgba(205, 154, 95, 0.18);
+    border: 1px solid rgba(212, 175, 55, 0.18);
   }
 
   /* Superficie de campo de formulario */
   .coffee-field {
     background-image: linear-gradient(160deg, rgba(10, 5, 3, 0.7) 0%, rgba(30, 21, 13, 0.55) 100%);
-    border: 1px solid rgba(205, 154, 95, 0.18);
+    border: 1px solid rgba(212, 175, 55, 0.18);
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
   }
 
   .coffee-field:focus {
     outline: none;
-    border-color: rgba(205, 154, 95, 0.65);
-    box-shadow: 0 0 0 3px rgba(205, 154, 95, 0.12);
+    border-color: rgba(212, 175, 55, 0.65);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
   }
 
   /* Secciones alternas con degradado */
@@ -229,19 +229,19 @@
 
   /* Halo ambiental de café */
   .coffee-glow {
-    background-image: radial-gradient(circle at center, rgba(205, 154, 95, 0.16) 0%, rgba(123, 79, 45, 0.08) 42%, transparent 72%);
+    background-image: radial-gradient(circle at center, rgba(212, 175, 55, 0.16) 0%, rgba(122, 97, 24, 0.08) 42%, transparent 72%);
   }
 
   /* Insignia / chip de acento */
   .coffee-chip {
-    background-image: linear-gradient(135deg, rgba(233, 210, 179, 0.16) 0%, rgba(156, 103, 57, 0.14) 100%);
-    border: 1px solid rgba(205, 154, 95, 0.32);
+    background-image: linear-gradient(135deg, rgba(242, 221, 146, 0.16) 0%, rgba(156, 125, 27, 0.14) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.32);
   }
 
   /* Aro de icono con degradado */
   .coffee-ring {
-    background-image: linear-gradient(140deg, rgba(205, 154, 95, 0.22) 0%, rgba(66, 43, 27, 0.5) 100%);
-    border: 1px solid rgba(205, 154, 95, 0.3);
+    background-image: linear-gradient(140deg, rgba(212, 175, 55, 0.22) 0%, rgba(66, 43, 27, 0.5) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.3);
   }
 }
 
@@ -354,7 +354,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-image: linear-gradient(180deg, #5d3c24 0%, #3a2818 100%);
+  background-image: linear-gradient(180deg, #5a4815 0%, #3a2818 100%);
   border-radius: 6px;
   border: 2px solid #120a06;
 }
@@ -365,5 +365,5 @@
 
 /* Firefox */
 * {
-  scrollbar-color: #5d3c24 #120a06;
+  scrollbar-color: #5a4815 #120a06;
 }

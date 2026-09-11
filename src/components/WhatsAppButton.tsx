@@ -22,11 +22,11 @@ export default function WhatsAppButton() {
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed bottom-6 right-6 z-40 group flex items-center justify-center p-3.5 rounded-full bg-linear-to-br from-mocha-200 via-mocha-500 to-mocha-800 text-espresso-950 shadow-2xl shadow-espresso-950/60 hover:shadow-mocha-600/50 border border-mocha-200/40"
+      className="fixed bottom-6 right-6 z-40 group flex items-center justify-center p-3.5 rounded-full bg-linear-to-br from-mocha-100 via-mocha-300 to-mocha-500 text-espresso-950 shadow-2xl shadow-espresso-950/60 hover:shadow-mocha-400/60 border border-mocha-100/60"
       aria-label="Chat on WhatsApp with MasterSpace"
     >
       {/* Subtle pulse effect ring */}
-      <span className="absolute -inset-1 rounded-full bg-linear-to-br from-mocha-300 to-mocha-700 opacity-40 group-hover:opacity-75 animate-ping pointer-events-none" />
+      <span className="absolute -inset-1 rounded-full bg-linear-to-br from-mocha-200 to-mocha-500 opacity-40 group-hover:opacity-75 animate-ping pointer-events-none" />
 
       {/* Official WhatsApp SVG Icon */}
       <svg
